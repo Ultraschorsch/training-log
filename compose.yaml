@@ -1,0 +1,32 @@
+services:
+
+  training-backend:
+    build: ./backend
+    container_name: training-backend
+    restart: unless-stopped
+    environment:
+      DATA_FILE: /data/training-log.json
+      BACKUP_KEEP: "60"
+      PORT: "3001"
+    volumes:
+      - training_data:/data
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
+
+  training-log:
+    build: ./frontend
+    container_name: training-log
+    restart: unless-stopped
+    ports:
+      - "30280:80"
+    depends_on:
+      - training-backend
+    labels:
+      - "com.centurylinklabs.watchtower.enable=false"
+
+volumes:
+  # Existing data volume. External, so removing or redeploying the stack
+  # can never delete it.
+  training_data:
+    external: true
+    name: training-log_training_data
